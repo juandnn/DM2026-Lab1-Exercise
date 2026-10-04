@@ -218,3 +218,5 @@ Each report is its own file in `reports/`, created by the notebook's "Create you
 
 - [Building Effective AI Agents](https://www.anthropic.com/research/building-effective-agents) (Anthropic)
 - [Effective Harnesses for Long-Running Agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents) (Anthropic)
+
+thx!
