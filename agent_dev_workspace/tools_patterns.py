@@ -1,4 +1,5 @@
 import os
+import re
 import tempfile
 import numpy as np
 import pandas as pd
@@ -40,7 +41,11 @@ def make_tools(session):
         if cat_df.empty:
             return {"error": f"No documents found for category_name '{category_name}'."}
 
-        texts = cat_df["text"].fillna("").astype(str).tolist()
+        # Safely convert texts to ASCII/UTF-8 by encoding to ASCII and ignoring non-ASCII/invalid bytes
+        texts = [
+            str(t).encode("ascii", "ignore").decode("utf-8")
+            for t in cat_df["text"].fillna("")
+        ]
 
         vectorizer = CountVectorizer(stop_words="english")
         try:
@@ -117,18 +122,30 @@ def make_tools(session):
             )
             return summary
 
+        # Ensure term names are safely encoded as clean ASCII strings
+        cleaned_surviving_terms = [
+            t.encode("ascii", "ignore").decode("utf-8") for t in surviving_terms
+        ]
+
         surviving_indices = [vectorizer.vocabulary_[term] for term in surviving_terms]
         filtered_dense = dense_counts[:, surviving_indices]
 
         binary_df = pd.DataFrame(
             (filtered_dense >= 1).astype(int),
-            columns=surviving_terms,
+            columns=cleaned_surviving_terms,
         )
 
         with tempfile.TemporaryDirectory() as temp_dir:
             db_file = os.path.join(temp_dir, "db.txt")
             converter = DF2DB.DF2DB(binary_df, "dense")
             converter.convert2TransactionalDatabase(db_file, ">=", 1)
+
+            # Re-read and write the transactional database using encoding='utf-8', errors='ignore'
+            if os.path.exists(db_file):
+                with open(db_file, "r", encoding="utf-8", errors="ignore") as f:
+                    content = f.read()
+                with open(db_file, "w", encoding="utf-8", errors="ignore") as f:
+                    f.write(content)
 
             if algorithm == "fpgrowth":
                 miner = FPGrowth.FPGrowth(db_file, minSup=min_sup)

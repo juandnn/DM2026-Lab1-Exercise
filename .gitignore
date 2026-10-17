@@ -47,10 +47,10 @@ agent_dev_workspace/
 # these shared folders now -- one encrypted log file, any saved plots,
 # and (agentic-pipeline/homework only) an exported report, each
 # distinguished by filename rather than by directory.
-session_logs/*.jsonl
-session_logs/*.jsonl.enc
-plots/*.png
-reports/*.md
+# session_logs/*.jsonl
+# session_logs/*.jsonl.enc
+# plots/*.png
+# reports/*.md
 
 # Local Anaconda Navigator tooling state, not course content -- created
 # automatically when this folder is opened as a project through
